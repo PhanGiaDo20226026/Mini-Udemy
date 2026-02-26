@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm install
+
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+COPY . .
+
+EXPOSE 4000
+
+# Run migrations and start dev server
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]

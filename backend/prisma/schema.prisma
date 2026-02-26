@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STUDENT)
+  avatar    String?
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  coursesCreated Course[]     @relation("InstructorCourses")
+  enrollments    Enrollment[]
+  reviews        Review[]
+
+  @@map("users")
+}
+
+model Course {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  thumbnail   String?
+  price       Float       @default(0)
+  level       CourseLevel @default(BEGINNER)
+  published   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  instructorId String
+  instructor   User         @relation("InstructorCourses", fields: [instructorId], references: [id])
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+  categories   CategoriesOnCourses[]
+
+  @@map("courses")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  content     String?
+  videoUrl    String?
+  duration    Int      @default(0) // duration in seconds
+  order       Int
+  free        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  courseId String
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@map("lessons")
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  courseId  String
+  course   Course @relation(fields: [courseId], references: [id])
+  progress LessonProgress[]
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  lessonId     String
+  lesson       Lesson     @relation(fields: [lessonId], references: [id])
+
+  @@unique([enrollmentId, lessonId])
+  @@map("lesson_progress")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  courseId  String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("reviews")
+}
+
+model Category {
+  id      String @id @default(cuid())
+  name    String @unique
+  slug    String @unique
+  courses CategoriesOnCourses[]
+
+  @@map("categories")
+}
+
+model CategoriesOnCourses {
+  courseId    String
+  course     Course   @relation(fields: [courseId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@id([courseId, categoryId])
+  @@map("categories_on_courses")
+}
