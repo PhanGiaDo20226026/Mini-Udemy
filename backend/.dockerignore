@@ -2,3 +2,6 @@ node_modules
 dist
 .env
 .git
+public/videos/*.mp4
+public/videos/*.webm
+public/videos/*.mov

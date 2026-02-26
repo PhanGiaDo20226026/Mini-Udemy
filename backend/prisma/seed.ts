@@ -1,4 +1,4 @@
-import { PrismaClient, Role, CourseLevel } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -44,7 +44,7 @@ async function main() {
       email: "instructor@miniudemy.com",
       password: hashedPassword,
       name: "Nguyen Van A",
-      role: Role.INSTRUCTOR,
+      role: "INSTRUCTOR",
       bio: "Senior developer with 10+ years of experience",
     },
   });
@@ -57,7 +57,7 @@ async function main() {
       email: "student@miniudemy.com",
       password: hashedPassword,
       name: "Tran Van B",
-      role: Role.STUDENT,
+      role: "STUDENT",
     },
   });
 
@@ -71,7 +71,7 @@ async function main() {
       description:
         "Learn Next.js 14 from scratch. Build modern full-stack web applications with React Server Components, App Router, and more.",
       price: 499000,
-      level: CourseLevel.INTERMEDIATE,
+      level: "INTERMEDIATE",
       published: true,
       instructorId: instructor.id,
       thumbnail: "https://placehold.co/600x400?text=Next.js+14",
@@ -87,7 +87,7 @@ async function main() {
       description:
         "Master containerization with Docker and orchestration with Kubernetes. Deploy your applications like a pro.",
       price: 399000,
-      level: CourseLevel.BEGINNER,
+      level: "BEGINNER",
       published: true,
       instructorId: instructor.id,
       thumbnail: "https://placehold.co/600x400?text=Docker",
@@ -103,7 +103,7 @@ async function main() {
       description:
         "Build cross-platform mobile applications with React Native. From setup to deployment on App Store and Google Play.",
       price: 599000,
-      level: CourseLevel.ADVANCED,
+      level: "ADVANCED",
       published: true,
       instructorId: instructor.id,
       thumbnail: "https://placehold.co/600x400?text=React+Native",

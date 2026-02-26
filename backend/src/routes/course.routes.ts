@@ -59,7 +59,7 @@ courseRouter.get("/", async (req: Request, res: Response) => {
 
   // Calculate average rating for each course
   const coursesWithRating = await Promise.all(
-    courses.map(async (course) => {
+    courses.map(async (course: any) => {
       const avgRating = await prisma.review.aggregate({
         where: { courseId: course.id },
         _avg: { rating: true },

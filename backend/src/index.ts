@@ -1,6 +1,7 @@
 import "express-async-errors";
 import express from "express";
 import cors from "cors";
+import path from "path";
 import dotenv from "dotenv";
 import { authRouter } from "./routes/auth.routes";
 import { courseRouter } from "./routes/course.routes";
@@ -16,6 +17,13 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000", credentials: true }));
 app.use(express.json());
+
+// Serve static video files: GET /videos/filename.mp4
+app.use("/videos", express.static(path.join(__dirname, "../public/videos"), {
+  setHeaders: (res) => {
+    res.set("Accept-Ranges", "bytes");
+  },
+}));
 
 // Health check
 app.get("/api/health", (_req, res) => {

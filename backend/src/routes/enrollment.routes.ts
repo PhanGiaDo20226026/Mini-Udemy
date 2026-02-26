@@ -44,9 +44,9 @@ enrollmentRouter.get("/my", authenticate, async (req: AuthRequest, res: Response
   });
 
   // Calculate progress percentage
-  const enriched = enrollments.map((enrollment) => {
+  const enriched = enrollments.map((enrollment: any) => {
     const totalLessons = enrollment.course._count.lessons;
-    const completedLessons = enrollment.progress.filter((p) => p.completed).length;
+    const completedLessons = enrollment.progress.filter((p: any) => p.completed).length;
     const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
     return { ...enrollment, progressPercent };
   });

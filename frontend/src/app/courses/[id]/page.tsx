@@ -137,6 +137,12 @@ export default function CourseDetailPage() {
               >
                 {enrolling ? "Enrolling..." : "Enroll Now"}
               </button>
+              <button
+                onClick={() => router.push(`/courses/${course.id}/learn`)}
+                className="w-full py-3 mt-2 border-2 border-primary-600 text-primary-600 font-semibold rounded-lg hover:bg-primary-50 transition"
+              >
+                ▶ Start Learning
+              </button>
               <div className="mt-4 space-y-2 text-sm text-gray-600">
                 <p>✅ Full lifetime access</p>
                 <p>✅ Access on mobile and desktop</p>
@@ -155,7 +161,8 @@ export default function CourseDetailPage() {
             {course.lessons?.map((lesson: any, index: number) => (
               <div
                 key={lesson.id}
-                className="flex items-center gap-4 p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+                onClick={() => router.push(`/courses/${course.id}/learn?lesson=${index}`)}
+                className="flex items-center gap-4 p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer"
               >
                 <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
                   {index + 1}
