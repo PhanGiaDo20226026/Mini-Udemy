@@ -1,117 +1,190 @@
 # 🎓 Mini Udemy - Online Learning Platform
 
-A fullstack online learning platform built with **Next.js 14 + Express.js + PostgreSQL + Docker**.
+Nền tảng học trực tuyến fullstack xây dựng với **Next.js 14 + Express.js + PostgreSQL + Docker**.
+
+Khoá học mẫu: **Khoá học phát âm Tiếng Anh** - 43 bài học video qua YouTube.
+
+---
 
 ## 🏗️ Tech Stack
 
-| Layer      | Technology                          |
-|------------|-------------------------------------|
-| Frontend   | Next.js 14, React 18, TailwindCSS, Zustand |
-| Backend    | Express.js, TypeScript, Zod         |
-| Database   | PostgreSQL 16, Prisma ORM           |
-| DevOps     | Docker, Docker Compose              |
-| Auth       | JWT (JSON Web Tokens), bcrypt       |
+| Layer      | Technology                                  |
+|------------|---------------------------------------------|
+| Frontend   | Next.js 14, React 18, TailwindCSS, Zustand  |
+| Backend    | Express.js, TypeScript, Prisma, Zod          |
+| Database   | PostgreSQL 16, Prisma ORM                    |
+| DevOps     | Docker, Docker Compose                       |
+| Auth       | JWT (JSON Web Tokens), bcrypt                |
 
-## 📁 Project Structure
+---
+
+## 📁 Cấu trúc dự án
 
 ```
 mini-udemy-project/
 ├── backend/                 # Express.js API server
 │   ├── prisma/
-│   │   ├── schema.prisma    # Database schema
-│   │   └── seed.ts          # Seed data
+│   │   ├── schema.prisma    # Database schema (8 models)
+│   │   └── seed.ts          # Dữ liệu mẫu
 │   ├── src/
-│   │   ├── index.ts         # Entry point
-│   │   ├── lib/prisma.ts    # Prisma client
+│   │   ├── index.ts         # Entry point (port 4000)
 │   │   ├── middleware/       # Auth, error handling
 │   │   └── routes/          # API routes
+│   ├── scripts/             # Các script tiện ích
+│   ├── public/              # Video files, static assets
 │   ├── Dockerfile
 │   └── package.json
 ├── frontend/                # Next.js 14 App
 │   ├── src/
 │   │   ├── app/             # App Router pages
-│   │   ├── components/      # Reusable components
-│   │   └── lib/             # API client, store
+│   │   ├── components/      # Navbar, CourseCard...
+│   │   └── lib/             # API client, Zustand store
 │   ├── Dockerfile
 │   └── package.json
 ├── docker-compose.yml       # Docker orchestration
 └── README.md
 ```
 
-## 🚀 Quick Start
+---
 
-### Option 1: Docker (Recommended)
+## 🚀 Hướng dẫn chạy dự án (từng bước)
+
+### Yêu cầu cài đặt trước
+
+- **Docker Desktop** - Tải tại: https://www.docker.com/products/docker-desktop/
+- **Git** - Tải tại: https://git-scm.com/downloads
+
+> ⚠️ Đảm bảo Docker Desktop đang **chạy** (biểu tượng Docker xanh ở thanh taskbar) trước khi bắt đầu.
+
+---
+
+### Bước 1: Clone dự án
 
 ```bash
-# Start all services (PostgreSQL + Backend + Frontend)
-docker compose up --build
+git clone https://github.com/PhanGiaDo20226026/Mini-Udemy.git
+cd Mini-Udemy
+```
 
-# In another terminal, run database migration & seed
+---
+
+### Bước 2: Khởi chạy Docker
+
+```bash
+docker compose up --build -d
+```
+
+Lệnh này sẽ tự động:
+- Tạo database PostgreSQL
+- Build và chạy Backend (Express.js) trên port **4000**
+- Build và chạy Frontend (Next.js) trên port **3000**
+
+⏱️ Lần đầu build có thể mất **3-5 phút** (tải Docker images + cài npm packages).
+
+Kiểm tra containers đang chạy:
+
+```bash
+docker ps
+```
+
+Phải thấy 3 containers: `mini-udemy-db`, `mini-udemy-backend`, `mini-udemy-frontend`.
+
+---
+
+### Bước 3: Tạo database
+
+Chạy migration để tạo bảng trong database:
+
+```bash
 docker exec mini-udemy-backend npx prisma migrate dev --name init
+```
+
+---
+
+### Bước 4: Thêm dữ liệu mẫu (seed)
+
+```bash
 docker exec mini-udemy-backend npx prisma db seed
 ```
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:4000/api
-- Health check: http://localhost:4000/api/health
+Lệnh này tạo:
+- 2 tài khoản mẫu (Instructor + Student)
+- 3 khoá học mẫu với bài học
 
-### Option 2: Manual Setup
+---
 
-**Prerequisites:** Node.js 20+, PostgreSQL 16+
+### Bước 5: Import khoá học phát âm với 43 video YouTube
 
 ```bash
-# 1. Start PostgreSQL (or use Docker for just the DB)
-docker compose up postgres -d
-
-# 2. Setup Backend
-cd backend
-npm install
-npx prisma generate
-npx prisma migrate dev --name init
-npm run seed
-npm run dev
-
-# 3. Setup Frontend (new terminal)
-cd frontend
-npm install
-npm run dev
+docker cp backend/scripts/import-youtube-urls.ts mini-udemy-backend:/app/scripts/import-youtube-urls.ts
+docker cp backend/scripts/fix-encoding.ts mini-udemy-backend:/app/scripts/fix-encoding.ts
+docker cp backend/public/link_youtube.txt mini-udemy-backend:/app/public/link_youtube.txt
+docker exec mini-udemy-backend npx ts-node scripts/fix-encoding.ts
+docker exec mini-udemy-backend npx ts-node scripts/import-youtube-urls.ts
 ```
+
+> Lưu ý: Script `fix-encoding.ts` tạo khoá học phát âm với 43 bài học tiếng Việt có dấu.
+> Script `import-youtube-urls.ts` gán 43 link YouTube vào các bài học.
+
+---
+
+### Bước 6: Mở trình duyệt
+
+| Trang | URL |
+|-------|-----|
+| 🏠 Trang chủ | http://localhost:3000 |
+| 📚 Danh sách khoá học | http://localhost:3000/courses |
+| 🔐 Đăng nhập | http://localhost:3000/login |
+| 📝 Đăng ký | http://localhost:3000/register |
+| 🎬 Xem video học | http://localhost:3000/courses/[id]/learn |
+| 🔧 Backend API | http://localhost:4000/api/health |
+
+---
+
+## 🔐 Tài khoản demo
+
+| Vai trò    | Email                      | Mật khẩu    | Quyền |
+|------------|----------------------------|-------------|-------|
+| Giảng viên | instructor@miniudemy.com   | password123 | Tạo/sửa/xoá khoá học, quản lý bài học |
+| Học viên   | student@miniudemy.com      | password123 | Đăng ký khoá, xem video, đánh giá |
+
+---
 
 ## 📡 API Endpoints
 
 ### Auth
-| Method | Endpoint           | Description      | Auth |
+| Method | Endpoint           | Mô tả           | Auth |
 |--------|-------------------|------------------|------|
-| POST   | /api/auth/register | Register user    | ❌   |
-| POST   | /api/auth/login    | Login            | ❌   |
-| GET    | /api/auth/me       | Get current user | ✅   |
+| POST   | /api/auth/register | Đăng ký          | ❌   |
+| POST   | /api/auth/login    | Đăng nhập        | ❌   |
+| GET    | /api/auth/me       | Thông tin user   | ✅   |
 
 ### Courses
-| Method | Endpoint               | Description         | Auth |
+| Method | Endpoint               | Mô tả              | Auth |
 |--------|------------------------|---------------------|------|
-| GET    | /api/courses           | List courses        | ❌   |
-| GET    | /api/courses/:id       | Get course detail   | ❌   |
-| POST   | /api/courses           | Create course       | ✅ Instructor |
-| PUT    | /api/courses/:id       | Update course       | ✅ Instructor |
-| DELETE | /api/courses/:id       | Delete course       | ✅ Instructor |
-| GET    | /api/courses/categories/all | Get categories | ❌   |
+| GET    | /api/courses           | Danh sách khoá học  | ❌   |
+| GET    | /api/courses/:id       | Chi tiết khoá học   | ❌   |
+| POST   | /api/courses           | Tạo khoá học        | ✅ Instructor |
+| PUT    | /api/courses/:id       | Cập nhật khoá học   | ✅ Instructor |
+| DELETE | /api/courses/:id       | Xoá khoá học        | ✅ Instructor |
 
 ### Lessons
-| Method | Endpoint                  | Description        | Auth |
+| Method | Endpoint                  | Mô tả             | Auth |
 |--------|---------------------------|--------------------|------|
-| GET    | /api/lessons/course/:id   | Get course lessons | ❌   |
-| GET    | /api/lessons/:id          | Get lesson detail  | ✅   |
-| POST   | /api/lessons              | Create lesson      | ✅ Instructor |
-| PUT    | /api/lessons/:id          | Update lesson      | ✅ Instructor |
-| DELETE | /api/lessons/:id          | Delete lesson      | ✅ Instructor |
+| GET    | /api/lessons/course/:id   | Bài học của khoá   | ❌   |
+| GET    | /api/lessons/:id          | Chi tiết bài học   | ✅   |
+| POST   | /api/lessons              | Tạo bài học        | ✅ Instructor |
+| PUT    | /api/lessons/:id          | Cập nhật bài học   | ✅ Instructor |
+| DELETE | /api/lessons/:id          | Xoá bài học        | ✅ Instructor |
 
 ### Enrollments
-| Method | Endpoint                 | Description           | Auth |
+| Method | Endpoint                 | Mô tả                | Auth |
 |--------|--------------------------|-----------------------|------|
-| POST   | /api/enrollments         | Enroll in course      | ✅   |
-| GET    | /api/enrollments/my      | My enrollments        | ✅   |
-| POST   | /api/enrollments/progress| Mark lesson complete   | ✅   |
-| POST   | /api/enrollments/review  | Add/update review     | ✅   |
+| POST   | /api/enrollments         | Đăng ký khoá học      | ✅   |
+| GET    | /api/enrollments/my      | Khoá học của tôi      | ✅   |
+| POST   | /api/enrollments/progress| Đánh dấu hoàn thành   | ✅   |
+| POST   | /api/enrollments/review  | Đánh giá khoá học     | ✅   |
+
+---
 
 ## 🗄️ Database Schema
 
@@ -124,28 +197,45 @@ Courses ──< Reviews >── Users
 Courses >──< Categories (many-to-many)
 ```
 
-## 🔐 Demo Accounts
+**8 models:** User, Course, Lesson, Enrollment, LessonProgress, Review, Category, CategoriesOnCourses
 
-| Role       | Email                      | Password    |
-|------------|----------------------------|-------------|
-| Instructor | instructor@miniudemy.com   | password123 |
-| Student    | student@miniudemy.com      | password123 |
+---
 
-## 🛠️ Development
+## 🛠️ Các lệnh hữu ích
 
 ```bash
-# Run Prisma Studio (GUI for database)
-cd backend && npx prisma studio
+# Xem logs của backend
+docker logs mini-udemy-backend -f
 
-# Generate Prisma client after schema changes
-npx prisma generate
+# Xem logs của frontend
+docker logs mini-udemy-frontend -f
 
-# Create new migration
-npx prisma migrate dev --name <migration_name>
+# Mở Prisma Studio (GUI quản lý database)
+docker exec -it mini-udemy-backend npx prisma studio
 
-# Reset database
-npx prisma migrate reset
+# Restart toàn bộ
+docker compose restart
+
+# Dừng toàn bộ
+docker compose down
+
+# Dừng và xoá database (reset hoàn toàn)
+docker compose down -v
 ```
+
+---
+
+## ❓ Xử lý lỗi thường gặp
+
+| Lỗi | Nguyên nhân | Cách sửa |
+|-----|------------|----------|
+| `docker compose` không tìm thấy | Docker Desktop chưa cài hoặc chưa mở | Cài Docker Desktop và mở lên |
+| Backend container restart liên tục | Prisma + OpenSSL lỗi | Đã fix trong Dockerfile (dùng node:20-slim) |
+| `npx prisma db seed` lỗi | Chưa có config seed | Đã thêm vào package.json |
+| Trang web trắng / không load | Container chưa build xong | Chờ 1-2 phút, kiểm tra `docker ps` |
+| Video không phát | Chưa chạy script import YouTube URL | Chạy lại Bước 5 |
+
+---
 
 ## 📜 License
 
