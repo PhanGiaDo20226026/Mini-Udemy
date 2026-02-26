@@ -79,6 +79,17 @@ export default function LearnPage() {
   const videoUrl = currentLesson.videoUrl;
   const hasVideo = videoUrl && !videoUrl.includes("example.com");
 
+  // Detect YouTube URL and extract video ID
+  const getYouTubeId = (url: string): string | null => {
+    const match = url.match(
+      /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    );
+    return match ? match[1] : null;
+  };
+
+  const youtubeId = videoUrl ? getYouTubeId(videoUrl) : null;
+  const isYouTube = !!youtubeId;
+
   return (
     <div className="h-screen flex flex-col bg-gray-900">
       {/* Top bar */}
@@ -105,7 +116,16 @@ export default function LearnPage() {
         <div className="flex-1 flex flex-col">
           {/* Video player */}
           <div className="flex-1 bg-black flex items-center justify-center">
-            {hasVideo ? (
+            {hasVideo && isYouTube ? (
+              <iframe
+                key={currentLesson.id}
+                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
+                className="w-full h-full max-h-[calc(100vh-200px)]"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={currentLesson.title}
+              />
+            ) : hasVideo ? (
               <video
                 key={currentLesson.id}
                 controls
